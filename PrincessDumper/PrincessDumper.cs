@@ -48,6 +48,93 @@ namespace PrincessDumper
         /// </summary>
         /// <param name="il2cppBytes">Output parameter to store the IL2CPP bytes.</param>
         /// <param name="metadataBytes">Output parameter to store the metadata bytes.</param>
+        /// <summary>
+        /// Finds a module loaded in the current process by file name (case-insensitive).
+        /// </summary>
+        public static ProcessModule? FindModule(string moduleName)
+        {
+            using Process process = Process.GetCurrentProcess();
+            foreach (ProcessModule module in process.Modules)
+            {
+                if (module.ModuleName is not null &&
+                    module.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return module;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Reads the mapped image of a loaded module from the current process (read-only).
+        /// Unreadable regions are left zero-filled. Returns null if the module is not loaded.
+        /// </summary>
+        public static byte[]? ReadModuleImage(string moduleName)
+        {
+            ProcessModule? module = FindModule(moduleName);
+            if (module is null)
+            {
+                return null;
+            }
+
+            using Process process = Process.GetCurrentProcess();
+            long moduleBase = module.BaseAddress.ToInt64();
+            long moduleEnd = moduleBase + module.ModuleMemorySize;
+            byte[] moduleBytes = new byte[module.ModuleMemorySize];
+            long currentAddress = moduleBase;
+            while (currentAddress < moduleEnd)
+            {
+                int result = VirtualQueryEx(process.Handle, (IntPtr)currentAddress, out MEMORY_BASIC_INFORMATION memoryInfo, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (result == 0)
+                {
+                    // Error occurred or reached the end of the module's memory space
+                    break;
+                }
+
+                long regionStart = Math.Max(memoryInfo.BaseAddress.ToInt64(), moduleBase);
+                long regionEnd = Math.Min(memoryInfo.BaseAddress.ToInt64() + memoryInfo.RegionSize.ToInt64(), moduleEnd);
+                int length = (int)(regionEnd - regionStart);
+                byte[] buffer = new byte[length];
+                if (ReadProcessMemory(process.Handle, (IntPtr)regionStart, buffer, length, out _))
+                {
+                    Buffer.BlockCopy(buffer, 0, moduleBytes, (int)(regionStart - moduleBase), length);
+                }
+                else
+                {
+                    Logger.LogWarning($"{moduleName}: failed to read region 0x{regionStart:X} (+0x{length:X})");
+                }
+
+                currentAddress = regionEnd;
+            }
+            return moduleBytes;
+        }
+
+        /// <summary>
+        /// Rewrites section headers of an in-memory image so PointerToRawData/SizeOfRawData
+        /// match VirtualAddress/VirtualSize, making the dump loadable by static tools.
+        /// </summary>
+        public static void UnmapSectionHeaders(byte[] moduleBytes)
+        {
+            using var stream = new MemoryStream(moduleBytes);
+            using var reader = new BinaryReader(stream);
+            using var writer = new BinaryWriter(stream);
+            stream.Position = 0x3C;
+            int peHeaderOffset = reader.ReadInt32();
+            stream.Position = peHeaderOffset + 6;
+            ushort numberOfSections = reader.ReadUInt16();
+            stream.Position = peHeaderOffset + 20;
+            ushort sizeOfOptionalHeader = reader.ReadUInt16();
+            int section0StartPosition = peHeaderOffset + 24 + sizeOfOptionalHeader;
+            for (int i = 0; i < numberOfSections; i++)
+            {
+                stream.Position = section0StartPosition + (i * 40) + 8;
+                uint virtualSize = reader.ReadUInt32();
+                uint virtualAddress = reader.ReadUInt32();
+                writer.Write(virtualSize);    // SizeOfRawData
+                writer.Write(virtualAddress); // PointerToRawData
+            }
+        }
+
         public static void RuntimeDump(out byte[] il2cppBytes, out byte[] metadataBytes)
         {
             string moduleName = "GameAssembly.dll";
@@ -60,35 +147,7 @@ namespace PrincessDumper
                 }
                 if (module.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase))
                 {
-                    byte[] moduleBytes = new byte[module.ModuleMemorySize];
-                    IntPtr moduleEndAddress = (IntPtr)((long)module.BaseAddress + (long)module.ModuleMemorySize);
-                    IntPtr currentAddress = module.BaseAddress;
-                    while (currentAddress.ToInt64() < moduleEndAddress.ToInt64())
-                    {
-                        int result = VirtualQueryEx(process.Handle, currentAddress, out MEMORY_BASIC_INFORMATION memoryInfo, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
-                        if (result == 0)
-                        {
-                            // Error occurred or reached the end of the module's memory space
-                            break;
-                        }
-
-                        byte[] buffer = new byte[(int)memoryInfo.RegionSize];
-                        // Read memory contents
-                        if (ReadProcessMemory(process.Handle, memoryInfo.BaseAddress, buffer, buffer.Length, out _))
-                        {
-                            // Dump the contents of buffer to a file or process it as needed
-                            // Example: File.WriteAllBytes("dump.bin", buffer);
-                            Buffer.BlockCopy(buffer, 0, moduleBytes, (int)(currentAddress.ToInt64() - module.BaseAddress.ToInt64()), buffer.Length);
-                        }
-                        else
-                        {
-                            // Failed to read memory
-                            Logger.LogError("Failed to read memory at address: " + memoryInfo.BaseAddress);
-                        }
-
-                        // Move to the next memory region
-                        currentAddress = (IntPtr)((long)memoryInfo.BaseAddress + (long)memoryInfo.RegionSize);
-                    }
+                    byte[] moduleBytes = ReadModuleImage(moduleName) ?? new byte[module.ModuleMemorySize];
                     using (var stream = new MemoryStream(moduleBytes))
                     using (var reader = new BinaryReader(stream))
                     using (var writer = new BinaryWriter(stream))
