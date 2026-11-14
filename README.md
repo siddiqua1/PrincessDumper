@@ -9,7 +9,9 @@ Nothing in the game is patched or hooked; the plugin only reads its own process 
 ## Usage
 
 1. Build: `dotnet build -c Release` (set `-p:GameDir=<game folder>` if the game is not in `%USERPROFILE%\priconner`).
-2. Copy `PrincessDumper/bin/Release/net6.0/PrincessDumper.dll` to `<game>/BepInEx/plugins/`.
+2. Copy `PrincessDumper.Plugin/bin/Release/net6.0/PrincessDumper.Plugin.dll` to `<game>/BepInEx/plugins/`.
+   (The plugin has its own assembly name because some BepInEx builds already ship the
+   `PrincessDumper` library in `BepInEx/core`; the `PrincessDumper` project still builds that library.)
 3. Start the game. Dumps are written to `<game>/BepInEx/dumps/`:
    - `<module>-<timestamp>.mem.bin` — raw mapped image (offsets = RVAs)
    - `<module>-<timestamp>.unmapped.dll` — same, with section headers fixed for IDA/Ghidra

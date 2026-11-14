@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- BepInEx plugin. Uses a distinct assembly name because the game's BepInEx build already
+       ships the PrincessDumper library in BepInEx/core. The library source is compiled in
+       directly so the plugin has no dependency on whichever core version is installed. -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>PrincessDumper.Plugin</AssemblyName>
+    <RootNamespace>PrincessDumper</RootNamespace>
+    <Version>1.1.0</Version>
+    <GameDir Condition="'$(GameDir)' == ''">$(USERPROFILE)\priconner</GameDir>
+    <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\PrincessDumper\PrincessDumper.cs" Link="PrincessDumper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx.Core">
+      <HintPath>$(BepInExCore)\BepInEx.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>$(BepInExCore)\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(BepInExCore)\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

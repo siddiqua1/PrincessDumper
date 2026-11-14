@@ -5,16 +5,42 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrincessDumper", "PrincessDumper\PrincessDumper.csproj", "{21EF58BA-800B-4826-9AD0-6DD4126C6652}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrincessDumper.Plugin", "PrincessDumper.Plugin\PrincessDumper.Plugin.csproj", "{D08FC225-C8FF-480F-A554-66AA87326B15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|x64.Build.0 = Debug|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Debug|x86.Build.0 = Debug|Any CPU
 		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|x64.ActiveCfg = Release|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|x64.Build.0 = Release|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|x86.ActiveCfg = Release|Any CPU
+		{21EF58BA-800B-4826-9AD0-6DD4126C6652}.Release|x86.Build.0 = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|x64.Build.0 = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Debug|x86.Build.0 = Debug|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|x64.ActiveCfg = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|x64.Build.0 = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|x86.ActiveCfg = Release|Any CPU
+		{D08FC225-C8FF-480F-A554-66AA87326B15}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
