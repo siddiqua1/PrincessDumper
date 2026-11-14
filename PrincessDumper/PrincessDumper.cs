@@ -110,6 +110,41 @@ namespace PrincessDumper
         }
 
         /// <summary>
+        /// Reads memory from the current process. Returns false if the range is unreadable.
+        /// </summary>
+        public static bool TryReadMemory(IntPtr address, byte[] buffer)
+        {
+            using Process process = Process.GetCurrentProcess();
+            return ReadProcessMemory(process.Handle, address, buffer, buffer.Length, out _);
+        }
+
+        /// <summary>
+        /// Returns (VirtualAddress, VirtualSize, Name) for each writable section of a PE image.
+        /// </summary>
+        public static List<(uint Rva, uint Size, string Name)> GetWritableSections(byte[] image)
+        {
+            const uint IMAGE_SCN_MEM_WRITE = 0x80000000;
+            var sections = new List<(uint, uint, string)>();
+            int pe = BitConverter.ToInt32(image, 0x3C);
+            ushort count = BitConverter.ToUInt16(image, pe + 6);
+            ushort optSize = BitConverter.ToUInt16(image, pe + 20);
+            int first = pe + 24 + optSize;
+            for (int i = 0; i < count; i++)
+            {
+                int h = first + i * 40;
+                string name = Encoding.ASCII.GetString(image, h, 8).TrimEnd('\0');
+                uint vsize = BitConverter.ToUInt32(image, h + 8);
+                uint rva = BitConverter.ToUInt32(image, h + 12);
+                uint flags = BitConverter.ToUInt32(image, h + 36);
+                if ((flags & IMAGE_SCN_MEM_WRITE) != 0)
+                {
+                    sections.Add((rva, vsize, name));
+                }
+            }
+            return sections;
+        }
+
+        /// <summary>
         /// Rewrites section headers of an in-memory image so PointerToRawData/SizeOfRawData
         /// match VirtualAddress/VirtualSize, making the dump loadable by static tools.
         /// </summary>
